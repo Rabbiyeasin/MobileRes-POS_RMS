@@ -156,6 +156,12 @@ $result = mysqli_query($conn, $query);
                             // Update discount and total price fields
                             document.getElementById('discValue').value = discountValue.toFixed(2);
                             document.getElementById('totalPrice').innerText = (totalPrice - discountValue).toFixed(2) + ' tk';
+
+                            if (quantity > 0) {
+                                document.getElementById('confirmBtn').removeAttribute('disabled');
+                            } else {
+                                document.getElementById('confirmBtn').setAttribute('disabled', true);
+                            }
                         }
                     </script>
                 </div>
@@ -164,14 +170,16 @@ $result = mysqli_query($conn, $query);
                 <div class="modal-footer border-0 justify-content-center gap-4">
                     <button type="button" class="btn btn-success text-center px-5" data-bs-dismiss="modal"
                         style="background-color:#5C9E31;">Cancel</button>
-                    <button type="button" class="btn btn-warning text-center px-5 text-white"
+                    <button disabled id="confirmBtn" type="button" data-bs-dismiss="modal" onclick="alert('dick')" class="btn btn-warning text-center px-5 text-white"
                         style="background: #EC6509;">Confirm</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script>
 
+    </script>
     <script>
         // Function to navigate back
         function goBack() {
