@@ -79,7 +79,7 @@ $result = mysqli_query($conn, $query);
 
                 <!-- Search -->
                 <div class="d-flex align-items-center border-bottom border-secondary flex-grow-1 w-100">
-                    <input class="form-control  border-0" type="search" placeholder="Search With Name or Title..."
+                    <input class="form-control border-0" onkeyup="searchItems()" id="searchInput" type="search" placeholder="Search With Name or Title..."
                         aria-label="Search">
                     <img src="image/search.png" alt="searchIcon" class="img-fluid"
                         style="height: 15px; margin-top: 2%;">
@@ -100,22 +100,18 @@ $result = mysqli_query($conn, $query);
     </div>
     <div class="container container-custom">
         <p class="h5 fw-bold">Product List:</p>
-        <?php
-
-            while ($row = mysqli_fetch_assoc($result)) {
-
-        ?>
-            <div class="card text mb-3 rounded-3" style="max-width: 100%; background-color: #EC6509;">
-                <a href="editItem.php?id=<?php echo $row['item_id'] ?>" class="text-decoration-none text-dark">
-                    <div class="card-body ">
-                        <p class="card-title fw-bold"><?php echo $row ['item_name'] ?> <span class="ms-4"><?php echo $row ['unit'] ?> gm</span></p>
-                        <p class="card-text fw-semibold"><?php echo $row ['item_id'] ?> <span style="float: inline-end;"><?php echo $row ['price'] ?> Tk</span></p>
-                    </div>
-                </a>
-
-            </div>
-        <?php }
-        ?>
+        <div id="itemList">
+            <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+                <div class="card text mb-3 rounded-3" style="max-width: 100%; background-color: #EC6509;">
+                    <a href="editItem.php?id=<?php echo $row['item_id'] ?>" class="text-decoration-none text-dark">
+                        <div class="card-body ">
+                            <p class="card-title fw-bold"><?php echo $row['item_name'] ?> <span class="ms-4"><?php echo $row['unit'] ?> gm</span></p>
+                            <p class="card-text fw-semibold"><?php echo $row['item_id'] ?> <span style="float: inline-end;"><?php echo $row['price'] ?> Tk</span></p>
+                        </div>
+                    </a>
+                </div>
+            <?php } ?>
+        </div>
     </div>
 
     <script>
@@ -124,6 +120,29 @@ $result = mysqli_query($conn, $query);
         }
     </script>
 
+
+    <script>
+        function searchItems() {
+            const query = document.getElementById('searchInput').value;
+
+            // Create XHR object
+            const xhr = new XMLHttpRequest();
+
+            // Define the request
+            xhr.open('POST', 'ajax/searchItemAjax.php', true);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            // Handle the response
+            xhr.onload = function() {
+                if (this.status === 200) {
+                    document.getElementById('itemList').innerHTML = this.responseText;
+                }
+            };
+
+            // Send the request with the search query
+            xhr.send('query=' + query);
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
         integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
