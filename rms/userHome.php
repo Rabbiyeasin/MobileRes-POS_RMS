@@ -16,7 +16,7 @@
         body {
             height: max-content;
             font-family: Inria serif;
-        }
+        }      
 
         .btn-dashboard {
             display: flex;
@@ -139,7 +139,7 @@
             <div class="row justify-content-center">
                 <!-- First row of buttons -->
                 <div class="col-4 d-flex justify-content-center">
-                    <a href="sales.html" class="btn-dashboard text-decoration-none">
+                    <a href="sales.php" class="btn-dashboard text-decoration-none">
                         <img src="image/sales.png" alt="Sales">
                         <span>Sales</span>
                     </a>

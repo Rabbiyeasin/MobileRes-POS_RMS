@@ -11,17 +11,14 @@ $result = mysqli_query($conn, $query);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Item</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.lineicons.com/4.0/lineicons.css">
-
     <style>
         body {
             height: max-content;
             font-family: Inria serif;
         }
-
 
         .container-custom {
             padding: 20px;
@@ -29,12 +26,8 @@ $result = mysqli_query($conn, $query);
 
         input:focus,
         .form-control:focus {
-
-
             outline: none;
             box-shadow: none;
-
-
         }
     </style>
 </head>
@@ -84,10 +77,6 @@ $result = mysqli_query($conn, $query);
                     <img src="image/search.png" alt="searchIcon" class="img-fluid"
                         style="height: 15px; margin-top: 2%;">
                 </div>
-
-                <!-- Search Button -->
-                <button type="submit" name="search" class="btn btn-warning ms-4"
-                    style="background-color: #EC6509;">Search</button>
             </div>
         </div>
 
@@ -122,25 +111,22 @@ $result = mysqli_query($conn, $query);
 
 
     <script>
+        let debounceTimeout;
+
         function searchItems() {
-            const query = document.getElementById('searchInput').value;
-
-            // Create XHR object
-            const xhr = new XMLHttpRequest();
-
-            // Define the request
-            xhr.open('POST', 'ajax/searchItemAjax.php', true);
-            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-            // Handle the response
-            xhr.onload = function() {
-                if (this.status === 200) {
-                    document.getElementById('itemList').innerHTML = this.responseText;
-                }
-            };
-
-            // Send the request with the search query
-            xhr.send('query=' + query);
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                const query = document.getElementById('searchInput').value;
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', 'ajax/searchItemAjax.php', true);
+                xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                xhr.onload = function() {
+                    if (this.status === 200) {
+                        document.getElementById('itemList').innerHTML = this.responseText;
+                    }
+                };
+                xhr.send('query=' + query);
+            }, 300); // Delay of 300ms
         }
     </script>
 
