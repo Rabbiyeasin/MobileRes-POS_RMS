@@ -1,47 +1,47 @@
 <?php
-  $signin = false;
-  $error = false;
-  $role = '';
+$signin = false;
+$error = false;
+$role = '';
 
-    if(isset($_POST['signin'])) 
-  {
-    include'components\dbconnect.php';
-    $userName =$_POST['username'];
+if (isset($_POST['signin'])) {
+    include 'components\dbconnect.php';
+    $userName = $_POST['username'];
     $password = $_POST['password'];
     $sql = "SELECT * FROM `users` WHERE Username = '$userName'";
     $result = mysqli_query($conn, $sql);
     $num = mysqli_num_rows($result);
 
     if ($num == 1) {
-      while ($row = mysqli_fetch_assoc($result)) {
-        if ($password == $row['password']) {
-          session_start();
-          $signin = true;
-          
-          $_SESSION['id'] = $row['u_id'];
-          $_SESSION['loggedin'] = true;
-          $role = $row['role'];
-        }
-        else {
-          $error = "Invalid Id or Password";
-        }
+        while ($row = mysqli_fetch_assoc($result)) {
+            if ($password == $row['password']) {
+                // server should keep session data for AT LEAST 7 days
+                ini_set('session.gc_maxlifetime', 604800);
 
-      }
+                // each client should remember their session id for EXACTLY 7 days
+                session_set_cookie_params(604800);
 
+                session_start();
+                $signin = true;
+
+                $_SESSION['id'] = $row['user_id'];
+                $_SESSION['loggedin'] = true;
+                $role = $row['role'];
+            } else {
+                $error = "Invalid Id or Password";
+            }
+        }
+    } else {
+        $error = "Invalid Credentials";
     }
-    else {
-      $error = "Invalid Credentials";
-    }
-    
+
     echo $role;
-    if ($role == 'user'){
-      header("Location: userHome.php");
+    if ($role == 'user') {
+        header("Location: userHome.php");
     }
-    if ($role == 'admin'){
-      header("Location: adminHome.php");
+    if ($role == 'admin') {
+        header("Location: adminHome.php");
     }
-
-  }
+}
 
 ?>
 <!DOCTYPE html>
@@ -110,7 +110,7 @@
 
     <div class="header">
         <?php
-        
+
         if ($error) {
             echo ' <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <strong>Error!</strong> ' . $error . '

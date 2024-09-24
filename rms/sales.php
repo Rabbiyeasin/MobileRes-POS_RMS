@@ -52,9 +52,22 @@ $result = mysqli_query($conn, $query);
             <!-- Toggler for menu -->
             <a href="cart.html" class="btn btn-transparent border-0" style="box-shadow: none;">
                 <img src="image/cart.png" alt="Menu" style="width: 20px; height: 20px;">
+                <i class="bi bi-cart"></i> Cart <span id="cartCounter" class="badge bg-primary">0</span>
             </a>
+
+
         </div>
     </nav>
+
+    <!-- Bootstrap Toast for Success Notification -->
+    <div class="toast align-items-center text-bg-success" id="cartToast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                Product added to cart successfully!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
 
     <div class="container container-custom mt-3">
         <div class="container mt-3">
@@ -155,7 +168,7 @@ $result = mysqli_query($conn, $query);
 
                             // Update discount and total price fields
                             document.getElementById('discValue').value = discountValue.toFixed(2);
-                            document.getElementById('totalPrice').innerText = (totalPrice - discountValue).toFixed(2) + ' tk';
+                            document.getElementById('totalPrice').innerText = (totalPrice - discountValue).toFixed(2);
 
                             if (quantity > 0) {
                                 document.getElementById('confirmBtn').removeAttribute('disabled');
@@ -164,13 +177,14 @@ $result = mysqli_query($conn, $query);
                             }
                         }
                     </script>
+
                 </div>
 
 
                 <div class="modal-footer border-0 justify-content-center gap-4">
                     <button type="button" class="btn btn-success text-center px-5" data-bs-dismiss="modal"
                         style="background-color:#5C9E31;">Cancel</button>
-                    <button disabled id="confirmBtn" type="button" data-bs-dismiss="modal" onclick="alert('dick')" class="btn btn-warning text-center px-5 text-white"
+                    <button disabled id="confirmBtn" type="button" data-bs-dismiss="modal" class="btn btn-warning text-center px-5 text-white"
                         style="background: #EC6509;">Confirm</button>
                 </div>
             </div>
@@ -178,7 +192,53 @@ $result = mysqli_query($conn, $query);
     </div>
 
     <script>
+        document.getElementById('confirmBtn').addEventListener('click', function() {
+            const productID = parseInt(document.getElementById('modalItemCode').innerText);
+            const quantity = document.getElementById('quantity').value;
+            const totalPrice = parseFloat(document.getElementById('totalPrice').innerText);
 
+            const formData = new FormData();
+            formData.append('product_id', productID);
+            formData.append('quantity', quantity);
+            formData.append('total_price', totalPrice);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'ajax/cartAdd.php', true);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('orderSaleModal'));
+                    modal.hide();
+
+                    // Show the toast notification
+                    const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                    toast.show();
+
+                    // Update the cart counter
+                    updateCartCounter();
+                } else {
+                    console.error('Failed to add product to cart');
+                }
+            };
+            xhr.send(formData);
+        });
+
+        // Function to update the cart counter
+        function updateCartCounter() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', 'ajax/cartCounter.php', true); // Assuming '/cart/count' returns the number of items in the cart.
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+
+                    const count = JSON.parse(xhr.responseText).count;
+                    document.getElementById('cartCounter').textContent = count;
+                }
+            };
+            xhr.send();
+        }
     </script>
     <script>
         // Function to navigate back
