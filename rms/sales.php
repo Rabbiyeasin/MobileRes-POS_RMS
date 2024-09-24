@@ -1,3 +1,9 @@
+<?php
+include 'components/dbconnect.php';
+$query = "SELECT * FROM `item` ORDER BY item_id ASC";
+$result = mysqli_query($conn, $query);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -16,19 +22,14 @@
             font-family: Inria serif;
         }
 
-
         .container-custom {
             padding: 20px;
         }
 
         input:focus,
         .form-control:focus {
-
-
             outline: none;
             box-shadow: none;
-
-
         }
     </style>
 </head>
@@ -42,8 +43,9 @@
 
             <!-- Centered Title with Icon -->
             <span class="mx-auto fs-5 fw-bold text-white d-flex align-items-center gap-4">
-                <button onclick="goBack()" class="btn btn-transparent border-0" style="margin-left: -5rem;"><i
-                    class="lni lni-shift-left" style="font-size: 20px; color: #fff;"></i> </button><!-- Icon -->
+                <button onclick="goBack()" class="btn btn-transparent border-0" style="margin-left: -5rem;">
+                    <i class="lni lni-shift-left" style="font-size: 20px; color: #fff;"></i>
+                </button><!-- Icon -->
                 <span>Sales</span> <!-- Text -->
             </span>
 
@@ -51,102 +53,114 @@
             <a href="cart.html" class="btn btn-transparent border-0" style="box-shadow: none;">
                 <img src="image/cart.png" alt="Menu" style="width: 20px; height: 20px;">
             </a>
-
-
         </div>
     </nav>
-    <div class="container container-custom mt-3 ">
 
-        <div class="container   mt-3">
+    <div class="container container-custom mt-3">
+        <div class="container mt-3">
             <!-- Wrapper for search and button -->
             <div class="d-flex justify-content-between align-items-center">
-
                 <!-- Search -->
                 <div class="d-flex align-items-center border-bottom border-secondary  w-100">
-                    <input class="form-control  border-0" type="search" placeholder="Search With Name or Title..."
-                        aria-label="Search">
-                    <img src="image/search.png" alt="searchIcon" class="img-fluid"
-                        style="height: 15px; margin-top: 2%;">
+                    <input id="search-input" class="form-control border-0" type="search" placeholder="Search With Name or Title..."
+                        aria-label="Search" onkeyup="debouncedSearch()">
+                    <img src="image/search.png" alt="searchIcon" class="img-fluid" style="height: 15px; margin-top: 2%;">
                 </div>
-
-                
-                
             </div>
         </div>
 
-        <!-- search button -->
-        <div class=" mt-3">
-            <button type="submit" name="search" class="btn btn-warning "
-                    style="background-color: #EC6509; width: 100%;">Search</button>
+        <!-- Search button -->
+        <div class="mt-3">
+            <button type="submit" name="search" class="btn btn-warning" style="background-color: #EC6509; width: 100%;">Search</button>
         </div>
-
     </div>
+
     <div class="container container-custom">
         <p class="h5 fw-bold">Product List:</p>
-        <div class="card text mb-3 rounded-3" style="max-width: 100%; background-color: #EC6509;">
-            <button type="button" class="btn text-decoration-none text-dark p-0 " data-bs-toggle="modal"
-                data-bs-target="#orderSale" style="width: 100%;">
-                <div class="card-body text-start">
-                    <p class="card-title fw-bold">Chicken Chola Batora</p>
-                    <p class="card-text fw-semibold">01 <span style="float: inline-end;">200 tk</span></p>
+        <div id="itemList">
+            <?php while ($product = mysqli_fetch_assoc($result)) { ?>
+                <div class="card text mb-3 rounded-3" style="max-width: 100%; background-color: #EC6509;">
+                    <button type="button" class="btn text-decoration-none text-dark p-0" data-bs-toggle="modal"
+                        data-bs-target="#orderSaleModal" onclick="loadProductData(<?php echo $product['item_id']; ?>)" style="width: 100%;">
+                        <div class="card-body text-start">
+                            <p class="card-title fw-bold"><?php echo $product['item_name']; ?></p>
+                            <span style="float: right;"><?php echo $product['price']; ?> tk</span>
+                        </div>
+                    </button>
                 </div>
-            </button>
-
+            <?php } ?>
         </div>
     </div>
 
-
-
     <!-- Modal Structure -->
-    <div class="modal fade" id="orderSale" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true"
-        data-bs-backdrop="static">
+    <div class="modal fade" id="orderSaleModal" tabindex="-1" aria-labelledby="orderSaleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header justify-content-center" style="background-color: #EC6509;">
-                    <h5 class="modal-title text-center" id="orderModalLabel">Chicken Chola Batora</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderSaleModalLabel">Item Details <span id="modalItemName" class="fw-bold"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-
                 <div class="modal-body">
                     <div class="card text mb-3 rounded-4" style="max-width: 100%; background-color:#FF964F;">
                         <div class="card-body text-start">
-                            <p class="card-title ">Item code - 02<span style="float: inline-end;">Unit -01 </span></p>
+                            <p class="card-title">Item code - <span id="modalItemCode"></span> <span style="float: inline-end;">Unit - <span id="modalItemUnit"></span></span></p>
                         </div>
                     </div>
                     <div class="card text mb-3 rounded-4" style="max-width: 100%; background-color:#FF964F;">
                         <div class="card-body text-start">
-                            <p class="card-title ">Price<span style="float: inline-end;">200.00 tk </span></p>
+                            <p class="card-title">Price <span style="float: inline-end;"><span id="modalItemPrice"></span> Taka</span></p>
                         </div>
                     </div>
                     <div class="card text mb-3 rounded-4" style="max-width: 100%; background-color:#FF964F;">
                         <div class="card-body text-start">
-                            <p class="card-title ">Quantity<span class="" style="float: inline-end;">
-                                    <input type="number" class="bg-transparent "
-                                        style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;">
+                            <p class="card-title">Quantity<span style="float: inline-end;">
+                                    <input type="number" class="bg-transparent" min="1" id="quantity" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;" onkeyup="calculatePercent()">
                                 </span></p>
                         </div>
                     </div>
                     <div class="card text mb-3 rounded-4" style="max-width: 100%; background-color:#FF964F;">
                         <div class="card-body text-start">
-                            <p class="card-title ">Disc. in %<span style="float: inline-end;"><input type="number"
-                                        class="bg-transparent "
-                                        style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;">
+                            <p class="card-title">Discount in %<span style="float: inline-end;">
+                                    <input type="number" id="discountPercent" onkeyup="calculatePercent()" class="bg-transparent" max="100" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;">
                                 </span></p>
                         </div>
                     </div>
                     <div class="card text mb-3 rounded-4" style="max-width: 100%; background-color:#FF964F;">
                         <div class="card-body text-start">
-                            <p class="card-title ">Disc. in Amt<span style="float: inline-end;"><input type="number"
-                                        class="bg-transparent "
-                                        style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;"></span>
-                            </p>
+                            <p class="card-title">Discount in Amount <span style="float: inline-end;"><input type="number" id="discValue" value="0" readonly class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;"></span></p>
                         </div>
                     </div>
                     <div class="card text mb-3 rounded-4" style="max-width: 100%; background-color:#FF964F;">
                         <div class="card-body text-start">
-                            <p class="card-title ">Selling Price<span style="float: inline-end;">400 tk </span></p>
+                            <p class="card-title">Selling Price<span style="float: inline-end; font-weight: bold; font-size: 20px;" id="totalPrice">0 tk</span></p>
                         </div>
                     </div>
+
+                    <script>
+                        function calculatePercent() {
+                            // Get item price, quantity, and discount percentage
+                            const price = parseFloat(document.getElementById('modalItemPrice').innerText) || 0;
+                            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+                            let discountPercent = parseInt(document.getElementById('discountPercent').value) || 0;
+
+                            // Limit discount percentage to 100
+                            if (discountPercent > 100) {
+                                discountPercent = 100;
+                                document.getElementById('discountPercent').value = discountPercent; // Update the input field
+                            }
+
+                            // Calculate total price
+                            const totalPrice = price * quantity;
+                            const discountValue = (totalPrice * (discountPercent / 100));
+
+                            // Update discount and total price fields
+                            document.getElementById('discValue').value = discountValue.toFixed(2);
+                            document.getElementById('totalPrice').innerText = (totalPrice - discountValue).toFixed(2) + ' tk';
+                        }
+                    </script>
                 </div>
+
+
                 <div class="modal-footer border-0 justify-content-center gap-4">
                     <button type="button" class="btn btn-success text-center px-5" data-bs-dismiss="modal"
                         style="background-color:#5C9E31;">Cancel</button>
@@ -158,19 +172,86 @@
     </div>
 
 
-
     <script>
+        // Function to navigate back
         function goBack() {
             window.history.back();
         }
+
+        // Debouncing logic to limit the number of API calls
+        let debounceTimer;
+
+        function debouncedSearch() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(searchItems, 300); // 300ms delay before firing the search
+        }
+
+        // Function to make the AJAX call to search items
+        function searchItems() {
+            const searchTerm = document.getElementById('search-input').value;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `ajax/getItems.php?search=${encodeURIComponent(searchTerm)}`, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const items = JSON.parse(xhr.responseText);
+                    updateItemList(items);
+                }
+            };
+            xhr.send();
+        }
+
+        // Function to update the list of items dynamically
+        function updateItemList(items) {
+            const itemList = document.getElementById('itemList');
+            itemList.innerHTML = ''; // Clear existing items
+
+            if (items.length > 0) {
+                items.forEach(item => {
+                    const itemCard = `
+                        <div class="card text mb-3 rounded-3" style="max-width: 100%; background-color: #EC6509;">
+                            <button type="button" class="btn text-decoration-none text-dark p-0" data-bs-toggle="modal"
+                                data-bs-target="#orderSaleModal" onclick="loadProductData(${item.item_id})" style="width: 100%;">
+                                <div class="card-body text-start">
+                                    <p class="card-title fw-bold">${item.item_name}</p>
+                                    <span style="float: right;">${item.price} tk</span>
+                                </div>
+                            </button>
+                        </div>
+                    `;
+                    itemList.innerHTML += itemCard;
+                });
+            } else {
+                itemList.innerHTML = '<p>No items found</p>';
+            }
+        }
+
+        function loadProductData(productId) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `ajax/getItemData.php?id=${productId}`, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        const itemData = JSON.parse(xhr.responseText)[0]; // Get the first item from the response
+                        // Populate modal with item data
+                        document.getElementById('modalItemName').innerText = itemData.item_name;
+                        document.getElementById('modalItemCode').innerText = itemData.item_id;
+                        document.getElementById('modalItemUnit').innerText = `Unit: ${itemData.unit}`;
+                        document.getElementById('modalItemPrice').innerText = itemData.price;
+                        document.getElementById('quantity').value = null;
+                        document.getElementById('discountPercent').value = null;
+                        calculatePercent();
+                    } else {
+                        console.error("Error fetching item data:", xhr.status, xhr.statusText);
+                    }
+                }
+            };
+            xhr.send();
+        }
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"
-        integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa"
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    </script>
 </body>
 
 </html>
