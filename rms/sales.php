@@ -50,7 +50,7 @@ $result = mysqli_query($conn, $query);
             </span>
 
             <!-- Toggler for menu -->
-            <a href="cart.html" class="btn btn-transparent border-0" style="box-shadow: none;">
+            <a href="cart.php" class="btn btn-transparent border-0" style="box-shadow: none;">
                 <img src="image/cart.png" alt="Menu" style="width: 20px; height: 20px;">
                 <i class="bi bi-cart"></i> Cart <span id="cartCounter" class="badge bg-primary">0</span>
             </a>
@@ -196,11 +196,13 @@ $result = mysqli_query($conn, $query);
             const productID = parseInt(document.getElementById('modalItemCode').innerText);
             const quantity = document.getElementById('quantity').value;
             const totalPrice = parseFloat(document.getElementById('totalPrice').innerText);
+            const unitPrice = parseFloat(document.getElementById('modalItemPrice').innerText) || 0;;
 
             const formData = new FormData();
             formData.append('product_id', productID);
             formData.append('quantity', quantity);
             formData.append('total_price', totalPrice);
+            formData.append('unit_price', unitPrice);
 
             const xhr = new XMLHttpRequest();
             xhr.open('POST', 'ajax/cartAdd.php', true);
@@ -239,6 +241,7 @@ $result = mysqli_query($conn, $query);
             };
             xhr.send();
         }
+        updateCartCounter();
     </script>
     <script>
         // Function to navigate back
