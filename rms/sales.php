@@ -196,13 +196,15 @@ $result = mysqli_query($conn, $query);
             const productID = parseInt(document.getElementById('modalItemCode').innerText);
             const quantity = document.getElementById('quantity').value;
             const totalPrice = parseFloat(document.getElementById('totalPrice').innerText);
-            const unitPrice = parseFloat(document.getElementById('modalItemPrice').innerText) || 0;;
+            const unitPrice = parseFloat(document.getElementById('modalItemPrice').innerText) || 0;
+            const discount_percent = parseFloat(document.getElementById('discountPercent').value) || 0;
 
             const formData = new FormData();
             formData.append('product_id', productID);
             formData.append('quantity', quantity);
             formData.append('total_price', totalPrice);
             formData.append('unit_price', unitPrice);
+            formData.append('discount_percent', discount_percent);
 
             const xhr = new XMLHttpRequest();
             xhr.open('POST', 'ajax/cartAdd.php', true);

@@ -10,11 +10,12 @@ $product_id = $_POST['product_id'];
 $quantity = $_POST['quantity'];
 $total_price = $_POST['total_price'];
 $unit_price = $_POST['unit_price'];
+$discount_percent = $_POST['discount_percent'];
 
 
 // Insert into cart
-$sql = "INSERT INTO cart (User_ID, Product_ID, Quantity, Unit_Price, Total_Price)
-        VALUES ('$user_id', '$product_id', '$quantity', '$unit_price', '$total_price')";
+$sql = "INSERT INTO cart (User_ID, Product_ID, Quantity, discount_percent, Unit_Price, Total_Price)
+        VALUES ('$user_id', '$product_id', '$quantity', '$discount_percent', '$unit_price', '$total_price')";
 
 if ($conn->query($sql) === TRUE) {
     echo json_encode(['status' => 'success']);
