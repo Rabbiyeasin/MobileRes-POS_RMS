@@ -11,22 +11,26 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id']; // Retrieve the logged-in user's ID
 
+// Store 'valid' in a variable
+$validity = 1;
+
 // Fetch cart items for the logged-in user
 $query = "
     SELECT item.item_name, item.price, cart.Total_Price AS sale_price, cart.Quantity, cart.Product_ID, cart.discount_percent, cart.Cart_ID
     FROM cart
     INNER JOIN item
     ON cart.Product_ID = item.item_id
-    WHERE cart.user_id = ?";
+    WHERE cart.user_id = ? AND cart.validity = ?";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param('i', $user_id);
+$stmt->bind_param('ii', $user_id, $validity); // Pass the variable instead of the literal
 $stmt->execute();
 $result = $stmt->get_result();
 
 $total_price = 0;
 $discount_total = 0;
 $net_payable = 0;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,11 +103,11 @@ $net_payable = 0;
                     // Loop through the cart items and display them
                     if ($result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
-                            $current_total_price = ($row['price'] * $row['Quantity']);                                //Total price of current product (unit price x quantity)
-                            $total_price += $current_total_price;                                                     //Add to Total price
+                            $current_total_price = ($row['price'] * $row['Quantity']);                                  //Total price of current product (unit price x quantity)
+                            $total_price += $current_total_price;                                                       //Add to Total price
                             $discount_amount = (($row['price'] * $row['Quantity']) * ($row['discount_percent'] / 100)); //current product discount amount
-                            $discount_total += $discount_amount;                                                      //Add to Total Discount amount
-                            $salePrice = $current_total_price - $discount_amount;                                     //Current Sale Price
+                            $discount_total += $discount_amount;                                                        //Add to Total Discount amount
+                            $salePrice = $current_total_price - $discount_amount;                                       //Current Sale Price
                             echo "<tr>
                                     <td class='border-5 rounded-1'>{$row['item_name']}</td>
                                     <td class='border-5 rounded-1'>{$row['price']}</td>
@@ -133,44 +137,81 @@ $net_payable = 0;
         <!-- Net Prices -->
         <div class="mt-4">
             <div class="card-body text-end mb-3">
-                <p class="card-title fs-1">Total price
+                <p class="card-title fs-4">Total price
                     <span><input type="number" class="bg-transparent" id="totalPrice" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 25%;" value="<?php echo $total_price; ?>" disabled></span>
                 </p>
             </div>
             <div class="card-body text-end mb-3">
-                <p class="card-title fs-1">Discount
+                <p class="card-title fs-4">Discount
                     <span><input type="number" class="bg-transparent" id="discountTotal" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 25%;" value="<?php echo $discount_total; ?>" disabled></span>
                 </p>
             </div>
             <div class="card-body text-end">
-                <p class="card-title fs-1">Net Payable
+                <p class="card-title fs-2">Net Payable
                     <span><input type="number" class="bg-transparent" id="netPayable" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 25%;" value="<?php echo $net_payable; ?>" disabled></span>
                 </p>
             </div>
         </div>
 
         <!-- Payment Options -->
-        <p class="h1 text-center mt-5">Payment option</p>
+        <p class="h3 text-center mt-5" style="background: #ec6509; color: white; padding: 10px; width: 100%;">Payment option</p>
 
-        <div class="card-body text-end mb-3">
-            <p class="card-title fs-1">Cash
-                <span><input type="number" id="cash" class="bg-transparent" oninput="calculateTotal()" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 25%;"></span>
-            </p>
-        </div>
-        <div class="card-body text-end mb-5">
-            <p class="card-title fs-1">MFS
-                <span><input type="number" id="mfs" class="bg-transparent" oninput="calculateTotal()" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 25%;"></span>
-            </p>
-        </div>
+        <form id="checkoutForm" action="ajax/checkoutCart.php">
+            <div class="card-body mb-3 row">
+                <div class="col-4 fs-1">Change
+                    <span><input type="float" disabled readonly name="change" id="change" class="" oninput="calculateTotal()" style="background-color: #d7d7d7; border: 2px solid;border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1;width: 65%;"></span>
+                </div>
+                <div class="col-4 fs-1">Cash
+                    <span><input type="float" name="cash" id="cash" class="bg-transparent" oninput="calculateTotal()" style="border: 2px solid;border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1;width: 65%;"></span>
+                </div>
+                <div class="col-4 fs-1">MFS
+                    <span><input type="float" name="mfs" id="mfs" class="bg-transparent" oninput="calculateTotal()" style="border: 2px solid;border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1;width: 65%;"></span>
+                </div>
+            </div>
 
-        <div class="d-flex mt-5 justify-content-between">
-            <span class="text-start" style="width: 50%;">
-                <input type="text" class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 95%; height: 3rem;" placeholder="Customer Name">
-            </span>
-            <span class="text-end" style="width: 50%;">
-                <input type="text" class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 95%; height: 3rem;" placeholder="Phone Number">
-            </span>
-        </div>
+            <div class="d-flex mt-5 justify-content-between">
+                <span class="text-start" style="width: 50%;">
+                    <input type="text" name="name" id="customerName" class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 95%; height: 3rem;" placeholder="Customer Name">
+                </span>
+                <span class="text-end" style="width: 50%;">
+                    <input type="text" name="phone" id="phoneNumber" class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 95%; height: 3rem;" placeholder="Phone Number">
+                </span>
+            </div>
+            <button id="checkoutBtn" type="submit" class="btn btn-warning mt-3 mb-5 float-end fs-2" disabled>Checkout</button>
+        </form>
+
+        <script>
+            document.getElementById('checkoutForm').addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                const form = event.target;
+                const formData = new FormData(form); // Create FormData object
+
+                fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => {
+                        return response.text().then(rawResponse => {
+                            console.log('Raw Response:', rawResponse); // Log the raw response (as text)
+
+                            // Now parse the raw response to JSON
+                            return JSON.parse(rawResponse);
+                        });
+                    })
+                    .then(data => {
+                        // Handle the JSON response after logging raw response
+                        if (data.success) {
+                            alert('Checkout successful!');
+                        } else {
+                            alert('Error during checkout: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        </script>
 
     </div>
 
@@ -250,6 +291,7 @@ $net_payable = 0;
             var modal = new bootstrap.Modal(document.getElementById('editCartModal'));
             modal.show();
             recalculate();
+            calculateTotal();
         }
 
         // Handle the form submission for updating the cart item
@@ -306,16 +348,26 @@ $net_payable = 0;
             let cash = parseFloat(document.getElementById('cash').value) || 0;
             let mfs = parseFloat(document.getElementById('mfs').value) || 0;
             let netPayable = parseFloat(document.getElementById('netPayable').value);
+            let changeAmount;
 
             // Calculate the total payment
             let totalPayment = cash + mfs;
 
-            // Check if total exceeds net payable
+            // Calculate change amount if totalPayment exceeds net payable
             if (totalPayment > netPayable) {
-                alert("Total of Cash and MFS cannot exceed the Net Payable amount.");
-                // Reset the inputs
-                document.getElementById('cash').value = '';
-                document.getElementById('mfs').value = '';
+                changeAmount = totalPayment - netPayable;
+                document.getElementById('change').value = changeAmount.toFixed(2);
+                console.log("The total of Cash and MFS exceeds the Net Payable. The change amount will be: " + changeAmount.toFixed(2));
+            } else {
+                // Reset the change amount to 0 if total is less or equal to net payable
+                document.getElementById('change').value = '0.00';
+            }
+
+            // Enable checkout only if name is provided and cash + MFS equals net payable
+            if (customerName && ((cash + mfs - changeAmount) === netPayable)) {
+                document.getElementById('checkoutBtn').disabled = false;
+            } else {
+                document.getElementById('checkoutBtn').disabled = true;
             }
         }
 

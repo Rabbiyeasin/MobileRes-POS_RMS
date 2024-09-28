@@ -11,16 +11,19 @@ if (!isset($_SESSION['id'])) {
 
 $user_id = $_SESSION['id']; // Retrieve the logged-in user's ID
 
+// Store 'valid' in a variable
+$validity = 1;
+
 // Fetch cart items for the logged-in user
 $query = "
     SELECT item.item_name, item.price, cart.Total_Price AS sale_price, cart.Quantity, cart.Product_ID, cart.discount_percent, cart.Cart_ID
     FROM cart
     INNER JOIN item
     ON cart.Product_ID = item.item_id
-    WHERE cart.user_id = ?";
+    WHERE cart.user_id = ? AND cart.validity = ?";
 
 $stmt = $conn->prepare($query);
-$stmt->bind_param('i', $user_id);
+$stmt->bind_param('ii', $user_id, $validity); // Pass the variable instead of the literal
 $stmt->execute();
 $result = $stmt->get_result();
 
