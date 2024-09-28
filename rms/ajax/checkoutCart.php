@@ -1,11 +1,11 @@
 <?php
 session_start();
-require '../db_connection.php'; // Assuming you have a database connection file
+include '../components/dbconnect.php';
 
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $customer_name = $_POST['name'];
-    $phone = $_POST['phone'];
+    $customer_name = isset($_POST['name']) ? $_POST['name'] : 'Customer';
+    $phone = isset($_POST['phone']) ? $_POST['phone'] : 0;
     $cash = $_POST['cash'];
     $mfs = $_POST['mfs'];
     $changeAmount = $_POST['change'];

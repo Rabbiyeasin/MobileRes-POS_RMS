@@ -23,6 +23,7 @@ if (isset($_POST['signin'])) {
                 session_start();
                 $signin = true;
 
+                $_SESSION['user_name'] = $row['username'];
                 $_SESSION['id'] = $row['user_id'];
                 $_SESSION['loggedin'] = true;
                 $role = $row['role'];

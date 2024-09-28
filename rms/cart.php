@@ -87,6 +87,7 @@ $net_payable = 0;
 
     <div class="container container-custom mt-5">
         <div class="table-responsive border border-dark" style="height: max-content; overflow: hidden;">
+            <a class="btn btn-primary" href="sales.php">Add Item</a>
             <table class="table table-bordered border-light">
                 <thead>
                     <tr>
@@ -159,7 +160,7 @@ $net_payable = 0;
         <form id="checkoutForm" action="ajax/checkoutCart.php">
             <div class="card-body mb-3 row">
                 <div class="col-4 fs-1">Change
-                    <span><input type="float" disabled readonly name="change" id="change" class="" oninput="calculateTotal()" style="background-color: #d7d7d7; border: 2px solid;border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1;width: 65%;"></span>
+                    <span><input type="float" readonly name="change" id="change" class="" oninput="calculateTotal()" style="background-color: #d7d7d7; border: 2px solid;border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1;width: 65%;"></span>
                 </div>
                 <div class="col-4 fs-1">Cash
                     <span><input type="float" name="cash" id="cash" class="bg-transparent" oninput="calculateTotal()" style="border: 2px solid;border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1;width: 65%;"></span>
@@ -203,6 +204,14 @@ $net_payable = 0;
                         // Handle the JSON response after logging raw response
                         if (data.success) {
                             alert('Checkout successful!');
+
+                            // Load ajax/print.php in the iframe inside the modal
+                            document.getElementById('printFrame').src = '';
+                            document.getElementById('printFrame').src = 'ajax/print.php';
+
+                            // Show the modal
+                            let printModal = new bootstrap.Modal(document.getElementById('printModal'));
+                            printModal.show();
                         } else {
                             alert('Error during checkout: ' + data.message);
                         }
@@ -215,6 +224,20 @@ $net_payable = 0;
 
     </div>
 
+    <!-- Modal Structure for Print Reciept -->
+    <div class="modal fade" id="printModal" tabindex="-1" aria-labelledby="printModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="printModalLabel">Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="printFrame" src="" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 

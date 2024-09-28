@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $user_id = $_SESSION['id']; // Assuming user is logged in and user_id is stored in session
 
     // Query to count the number of items in the cart for the current user
-    $query = "SELECT COUNT(*) AS count FROM cart WHERE user_ID = $user_id";
+    $query = "SELECT COUNT(*) AS count FROM cart WHERE user_ID = $user_id AND validity = '1'";
     $result = mysqli_query($conn, $query);
     
     if ($result) {
