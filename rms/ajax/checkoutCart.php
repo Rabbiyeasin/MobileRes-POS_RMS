@@ -18,8 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Insert the data into the orders table
-    $stmt = $conn->prepare("INSERT INTO orders (customer_name, phone, cash, mfs, changeAmount, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-    $stmt->bind_param("ssdddi", $customer_name, $phone, $cash, $mfs, $changeAmount, $user_id);
+    $stmt = $conn->prepare("INSERT INTO orders (customer_name, phone, cash, mfs, changeAmount, user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $time = time();
+    $stmt->bind_param("ssdddii", $customer_name, $phone, $cash, $mfs, $changeAmount, $user_id, $time);
     
     if ($stmt->execute()) {
         // Get the newly inserted cart_code

@@ -167,7 +167,7 @@
                 
 
                 <div class="col-4 d-flex justify-content-center">
-                    <a href="ivcReprint.html" class="btn-dashboard text-decoration-none">
+                    <a href="ivcReprint.php" class="btn-dashboard text-decoration-none">
                         <img src="image/reprint.png" alt="Reprint">
                         <span>Reprint</span>
                     </a>
