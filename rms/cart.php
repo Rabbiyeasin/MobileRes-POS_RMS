@@ -118,7 +118,7 @@ $net_payable = 0;
                                     ";
                     ?>
                             <td class='border-5 rounded-1' id="product-editbtn-<?php echo $row['Cart_ID']; ?>">
-                                <button class='btn btn-transparent' onclick="showEditModal('<?php echo $row['Product_ID']; ?>', '<?php echo $row['item_name']; ?>', '<?php echo $row['price']; ?>', '<?php echo $row['Quantity']; ?>', '<?php echo $row['discount_percent']; ?>')">
+                                <button class='btn btn-transparent' onclick="showEditModal('<?php echo $row['Cart_ID']; ?>', '<?php echo $row['Product_ID']; ?>', '<?php echo $row['item_name']; ?>', '<?php echo $row['price']; ?>', '<?php echo $row['Quantity']; ?>', '<?php echo $row['discount_percent']; ?>')">
                                     <i class='fa-solid fa-pen-to-square' style='color: black;'></i>
                                 </button>
                             </td>
@@ -172,10 +172,10 @@ $net_payable = 0;
 
             <div class="d-flex mt-5 justify-content-between">
                 <span class="text-start" style="width: 50%;">
-                    <input type="text" name="name" id="customerName" class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 95%; height: 3rem;" placeholder="Customer Name">
+                    <input type="text" onkeyup="calculateTotal()" name="name" id="customerName" class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 95%; height: 3rem;" placeholder="Customer Name">
                 </span>
                 <span class="text-end" style="width: 50%;">
-                    <input type="text" name="phone" id="phoneNumber" class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 95%; height: 3rem;" placeholder="Phone Number">
+                    <input type="text" onkeyup="calculateTotal()" name="phone" id="phoneNumber" class="bg-transparent" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 95%; height: 3rem;" placeholder="Phone Number">
                 </span>
             </div>
             <button id="checkoutBtn" type="submit" class="btn btn-warning mt-3 mb-5 float-end fs-2" disabled>Checkout</button>
@@ -272,9 +272,9 @@ $net_payable = 0;
                             <label for="editPrice" class="form-label">Unit Price</label>
                             <input type="number" class="form-control" id="editPrice" name="price" readonly disabled>
                         </div>
-                        <button class="btn btn-danger">Delete Item</button>
                         <button type="submit" class="btn btn-primary float-end">Update</button>
                     </form>
+                    <button id="delete-cart-item" data-product-id="PRODUCT_ID" data-bs-dismiss="modal" class="btn btn-danger">Delete</button>
                 </div>
             </div>
         </div>
@@ -295,6 +295,42 @@ $net_payable = 0;
                 document.getElementById('discountCash').value = 0; // Reset cash discount if inputs are invalid
             }
         }
+
+
+        document.getElementById('delete-cart-item').addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id'); // Get the product ID from the button's attribute
+
+            // Create an XHR object
+            const xhr = new XMLHttpRequest();
+
+            // Define the request
+            xhr.open('POST', 'ajax/delete_cart_product.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            // Set up a function to handle the response
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    // Assuming the response is a success message in JSON format
+                    console.log(xhr.responseText);
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        // Success! Optionally, remove the item from the modal or update the cart display
+                        console.log('Item removed from cart!');
+                        // Close modal or remove item from UI (optional)
+                        refreshTable();
+                        recalculate();
+                        calculateTotal();
+                    } else {
+                        alert('Failed to delete the item.');
+                    }
+                } else {
+                    alert('Request failed. Returned status: ' + xhr.status);
+                }
+            };
+
+            // Send the request with the product ID
+            xhr.send('cart_id=' + encodeURIComponent(productId));
+        });
     </script>
 
 
@@ -303,8 +339,9 @@ $net_payable = 0;
 
     <script>
         // Function to show the modal with the current cart item data
-        function showEditModal(itemId, itemName, price, quantity, discountPercent) {
+        function showEditModal(cartId, itemId, itemName, price, quantity, discountPercent) {
             document.getElementById('cartItemId').value = itemId;
+            document.getElementById('delete-cart-item').setAttribute('data-product-id', cartId);
             document.getElementById('editItemName').value = itemName;
             document.getElementById('editPrice').value = price;
             document.getElementById('editQuantity').value = quantity;
@@ -320,7 +357,7 @@ $net_payable = 0;
         // Handle the form submission for updating the cart item
         document.getElementById('editCartForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
+            console.log('Cart Item Update Called');
             let formData = new FormData(this);
 
             // Send the update request using AJAX
@@ -365,34 +402,45 @@ $net_payable = 0;
             };
             refreshXhr.send();
         }
+        
+        
 
         function calculateTotal() {
+            recalculate();
+
             // Get the input values
             let cash = parseFloat(document.getElementById('cash').value) || 0;
-            let mfs = parseFloat(document.getElementById('mfs').value) || 0;
+            let mfsValue = document.getElementById('mfs').value; // Get the raw value
+            let mfs = mfsValue ? parseFloat(mfsValue) : 0; // Set to 0 if empty
+           
             let netPayable = parseFloat(document.getElementById('netPayable').value);
-            let changeAmount;
-
-            // Calculate the total payment
             let totalPayment = cash + mfs;
+            let changeAmount = 0;
 
-            // Calculate change amount if totalPayment exceeds net payable
-            if (totalPayment > netPayable) {
+            // Console log for debugging
+            // console.log("Cash:", cash, "MFS:", mfs);
+
+            // Calculate the change amount if totalPayment exceeds netPayable
+            if (totalPayment >= netPayable) {
                 changeAmount = totalPayment - netPayable;
                 document.getElementById('change').value = changeAmount.toFixed(2);
                 console.log("The total of Cash and MFS exceeds the Net Payable. The change amount will be: " + changeAmount.toFixed(2));
             } else {
-                // Reset the change amount to 0 if total is less or equal to net payable
+                // Reset the change amount to 0 if the total is less than or equal to net payable
                 document.getElementById('change').value = '0.00';
             }
 
-            // Enable checkout only if name is provided and cash + MFS equals net payable
-            if (customerName && ((cash + mfs - changeAmount) === netPayable)) {
-                document.getElementById('checkoutBtn').disabled = false;
+            let customerName = document.getElementById('customerName').value.trim(); // Assuming customerName input field exists
+
+            // Enable checkout only if totalPayment is greater than or equal to netPayable
+            if (customerName && (totalPayment >= netPayable)) {
+                document.getElementById('checkoutBtn').removeAttribute('disabled');
             } else {
-                document.getElementById('checkoutBtn').disabled = true;
+                document.getElementById('checkoutBtn').setAttribute('disabled', true);
             }
         }
+
+
 
         function goBack() {
             window.history.back();

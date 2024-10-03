@@ -127,14 +127,14 @@ $result = mysqli_query($conn, $query);
                     <div class="card text mb-3 rounded-4" style="max-width: 100%; background-color:#FF964F;">
                         <div class="card-body text-start">
                             <p class="card-title">Quantity<span style="float: inline-end;">
-                                    <input type="number" class="bg-transparent" min="1" id="quantity" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;" onkeyup="calculatePercent()">
+                                    <input type="number" class="bg-transparent" min="1" id="quantity" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;" onchange="calculatePercent()" onkeyup="calculatePercent()">
                                 </span></p>
                         </div>
                     </div>
                     <div class="card text mb-3 rounded-4" style="max-width: 100%; background-color:#FF964F;">
                         <div class="card-body text-start">
                             <p class="card-title">Discount in %<span style="float: inline-end;">
-                                    <input type="number" id="discountPercent" onkeyup="calculatePercent()" class="bg-transparent" max="100" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;">
+                                    <input type="number" id="discountPercent" onchange="calculatePercent()" onkeyup="calculatePercent()" class="bg-transparent" max="100" style="border: 2px solid; border-image: linear-gradient(0deg, #EC6509, #FD6A06) 1; width: 5rem;">
                                 </span></p>
                         </div>
                     </div>

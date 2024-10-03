@@ -34,11 +34,11 @@ $net_payable = 0;
 // Loop through the cart items and display them
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
-        $current_total_price = ($row['price'] * $row['Quantity']);                                //Total price of current product (unit price x quantity)
-        $total_price += $current_total_price;                                                     //Add to Total price
+        $current_total_price = ($row['price'] * $row['Quantity']);                                  //Total price of current product (unit price x quantity)
+        $total_price += $current_total_price;                                                       //Add to Total price
         $discount_amount = (($row['price'] * $row['Quantity']) * ($row['discount_percent'] / 100)); //current product discount amount
-        $discount_total += $discount_amount;                                                      //Add to Total Discount amount
-        $salePrice = $current_total_price - $discount_amount;                                     //Current Sale Price
+        $discount_total += $discount_amount;                                                        //Add to Total Discount amount
+        $salePrice = $current_total_price - $discount_amount;                                       //Current Sale Price
         echo "<tr>
                                     <td class='border-5 rounded-1'>{$row['item_name']}</td>
                                     <td class='border-5 rounded-1'>{$row['price']}</td>
@@ -48,7 +48,7 @@ if ($result->num_rows > 0) {
                                     ";
 ?>
         <td class='border-5 rounded-1' id="product-editbtn-<?php echo $row['Cart_ID']; ?>">
-            <button class='btn btn-transparent' onclick="showEditModal('<?php echo $row['Product_ID']; ?>', '<?php echo $row['item_name']; ?>', '<?php echo $row['price']; ?>', '<?php echo $row['Quantity']; ?>', '<?php echo $row['discount_percent']; ?>')">
+            <button class='btn btn-transparent' onclick="showEditModal('<?php echo $row['Cart_ID']; ?>','<?php echo $row['Product_ID']; ?>', '<?php echo $row['item_name']; ?>', '<?php echo $row['price']; ?>', '<?php echo $row['Quantity']; ?>', '<?php echo $row['discount_percent']; ?>')">
                 <i class='fa-solid fa-pen-to-square' style='color: black;'></i>
             </button>
         </td>
